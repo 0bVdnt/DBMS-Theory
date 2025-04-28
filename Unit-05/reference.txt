@@ -1,0 +1,370 @@
+Okay, here is a detailed reference guide for UNIT-V: NoSQL and New Database Technologies, structured similarly to the previous unit guide.
+
+UNIT-V: NoSQL and New Database Technologies (Approx. 8 Hours)
+
+This unit explores the shift beyond traditional relational databases, focusing on NoSQL concepts, different NoSQL database types, their characteristics, use cases, and specific technologies like MongoDB and Cassandra.
+
+1. Introduction to NoSQL Databases
+
+Definition: NoSQL originally stood for "Non SQL" or "Non Relational," but has evolved to mean "Not Only SQL." It represents a broad class of database management systems that differ significantly from the classic relational database model (RDBMS). (Slide 28)
+
+Motivation: Emerged primarily due to the challenges posed by "web scale" applications (like Google, Facebook, Amazon) dealing with: (Slide 14, 15, 30)
+
+Big Data: Massive volumes, high velocity (speed of generation/processing), and wide variety (structured, semi-structured, unstructured) of data.
+
+Scalability: Need to handle massive growth in data and user load efficiently, often requiring distribution across many commodity servers (horizontal scaling/scale-out) rather than upgrading single large servers (vertical scaling/scale-up). (Slide 16, 17, 32)
+
+Flexibility: Need for dynamic or flexible schemas to accommodate rapidly evolving applications and diverse data types without complex migrations. (Slide 29, 31)
+
+Availability: High uptime requirements, often prioritizing availability over strict, immediate consistency across all nodes. (Slide 29)
+
+Performance: Fast key-value lookups and massive write performance needed for certain applications. (Slide 13)
+
+Key Characteristics: (Slide 30, 31)
+
+Often Schema-less or have flexible schemas.
+
+Typically designed for distributed environments (horizontal scaling).
+
+May relax ACID properties (especially strict Consistency) in favor of BASE properties.
+
+Use varied data models (Key-Value, Document, Column-Family, Graph).
+
+Often feature simpler query interfaces than full SQL (though this is evolving).
+
+Many are open-source.
+
+Structured vs. Unstructured Data: (Slides 3, 9, 10, 34)
+
+Structured Data: Highly organized data with a predefined format (schema), typically stored in tables with rows and columns (e.g., RDBMS). Easy to query and process. Examples: Customer records, financial transactions.
+
+Unstructured Data: Data without a predefined model or organization. Examples: Text documents, emails, images, videos, social media posts, sensor data. Makes up the vast majority of data generated today.
+
+Semi-structured Data: Has some organizational properties (e.g., tags, metadata) but doesn't fit a rigid relational schema. Examples: JSON, XML, BSON.
+
+NoSQL Relevance: NoSQL databases excel at handling semi-structured and sometimes unstructured data due to their flexible data models, whereas RDBMS are primarily designed for structured data.
+
+2. Distributed Database Concepts & Theory
+
+Distributed Database Model: (Slide 17)
+
+A database whose storage devices are not all attached to a common processing unit. Data is stored across multiple physical locations (nodes/servers) connected by a network.
+
+Goals: Increased reliability/availability (no single point of failure), scalability (add more nodes), potentially faster local access.
+
+Challenges: Query processing complexity, transaction management complexity (distributed commits), maintaining consistency across nodes, network latency, potential for network partitions.
+
+Horizontal Scaling (Scale-Out): Adding more commodity servers to distribute the load. Preferred model for NoSQL. (Slide 17)
+
+Vertical Scaling (Scale-Up): Increasing the resources (CPU, RAM, Disk) of a single server. Traditional RDBMS approach, has limits. (Slide 16)
+
+CAP Theorem (Brewer's Theorem): (Slides 20-24, 27, 30)
+
+Statement: In a distributed data system, it is impossible to simultaneously guarantee all three of the following properties:
+
+Consistency (C): Every read receives the most recent write or an error. All nodes see the same data at the same time (looks like a single, up-to-date system).
+
+Availability (A): Every request (read or write) receives a (non-error) response, without guarantee that it contains the most recent write. The system remains operational.
+
+Partition Tolerance (P): The system continues to operate despite an arbitrary number of messages being dropped (or delayed) by the network between nodes (i.e., the network partitions into potentially non-communicating sub-groups).
+
+The Trade-off: In the presence of a network partition (P), a distributed system must choose between Consistency (C) and Availability (A).
+
+CP System: Chooses Consistency over Availability. If a partition occurs, the system might become unavailable (return errors or wait indefinitely) to avoid returning stale data from one side of the partition. (e.g., Traditional RDBMS with distributed transactions often lean CP).
+
+AP System: Chooses Availability over Consistency. If a partition occurs, the system remains available, but some nodes might return older versions of data until the partition heals (eventual consistency). (e.g., Many NoSQL systems like Cassandra, DynamoDB).
+
+CA System: Chooses Consistency and Availability but cannot tolerate partitions. This only works if the system is not distributed (e.g., a single-node RDBMS).
+
+BASE Properties: (Slides 25, 26, 30, 33) An alternative model to ACID, often associated with AP NoSQL systems.
+
+Basically Available: The system guarantees availability (responds to requests), as per the CAP theorem (prioritizes A over C).
+
+Soft State: The state of the system may change over time, even without new input, due to eventual consistency. Data might be inconsistent across nodes temporarily.
+
+Eventually Consistent: If no new updates are made, eventually all replicas will converge to the same value. Consistency is achieved over time, not instantaneously. (Contrasts with ACID's strong consistency).
+
+3. Comparative Study of SQL and NoSQL
+
+Feature	SQL (Relational Databases - RDBMS)	NoSQL Databases
+Data Model	Structured, tables with predefined columns and rows.	Varied: Key-Value, Document, Column-Family, Graph.
+Schema	Rigid, predefined schema (schema-on-write).	Dynamic, flexible, or schema-less (schema-on-read).
+Scalability	Primarily Vertical (Scale-Up). Horizontal is complex.	Primarily Horizontal (Scale-Out). Designed for distribution.
+Consistency	Strong Consistency (ACID properties).	Tunable/Eventual Consistency (BASE properties typical). Some offer ACID for limited operations.
+Relationships	Handled via Foreign Keys and Joins.	Handled via embedding, direct references, or graph structures. Joins often limited or non-existent.
+Query Language	SQL (Structured Query Language) - standardized.	Varies by database type (often simpler APIs, sometimes SQL-like interfaces). Less standardized.
+Data Type	Primarily structured data.	Structured, semi-structured, unstructured data.
+Use Cases	OLTP, complex queries, data warehousing, systems requiring strong consistency (finance).	Big Data, real-time web apps, content management, IoT, social networks, caching, analytics.
+Examples	MySQL, PostgreSQL, Oracle, SQL Server, DB2.	MongoDB, Cassandra, Redis, Neo4j, Couchbase, HBase.
+
+(References: Slides 6, 7, 10, 18, 19, 26, 28, 31, 32, 33, 48, 51, 59, 97, 98)
+
+4. NoSQL Data Models (Types)
+
+(Slides 35, 36, 37, 39)
+
+Key-Value Store:
+
+Model: Simplest form. Stores data as a collection of key-value pairs, similar to a dictionary or hash map. Values are often opaque blobs to the database.
+
+Operations: Basic get(key), put(key, value), delete(key).
+
+Pros: Very high performance, highly scalable, simple model.
+
+Cons: Limited query capabilities (usually only by key), not suitable for complex relationships or transactions.
+
+Examples: Redis, Memcached, Riak, Amazon DynamoDB.
+
+Use Cases: Caching, session management, user profiles, real-time leaderboards.
+
+(Redis Details - Slide 40): Distributed data structure server, consistent hashing, non-blocking I/O, various data structures beyond simple strings (lists, sets, sorted sets, hashes).*
+
+Document Store:
+
+Model: Stores data in documents (often JSON, BSON, XML). Documents are self-contained units with potentially complex nested structures (objects, arrays). Collections group related documents.
+
+Operations: CRUD operations on documents, querying based on document structure and values, indexing on fields.
+
+Pros: Flexible schema, natural mapping to object-oriented programming, good performance for document-centric queries.
+
+Cons: Limited support for complex joins across collections, potential for data redundancy if embedding isn't used carefully.
+
+Examples: MongoDB, Couchbase, CouchDB.
+
+Use Cases: Content management, user profiles, e-commerce applications, blogging platforms, mobile apps.
+
+(Document Store Details - Slide 41): Often schema-free, JSON-like model, custom or JavaScript query model, MapReduce for aggregations, B-Tree indexes.*
+
+Column-Family Store (Wide-Column Store):
+
+Model: Stores data in tables, but optimized for column-based access. Rows have keys, but can have varying sets of columns. Data for a specific column is stored contiguously on disk. Group related columns into "column families".
+
+Operations: CRUD operations, querying specific columns or ranges within rows, aggregations efficient across many rows for few columns.
+
+Pros: Highly scalable (especially for writes), efficient for queries involving specific columns across many rows, flexible schema within rows.
+
+Cons: Can be more complex to model than key-value or document stores, query patterns different from RDBMS.
+
+Examples: Cassandra, HBase, Google Bigtable.
+
+Use Cases: Big Data analytics, logging, time-series data, systems with high write volumes.
+
+(Column Store Comparison - Slide 43): Shows difference between row-oriented (RDBMS) and column-oriented storage.*
+
+Graph Database:
+
+Model: Stores data as nodes (entities) and edges (relationships) with properties on both. Designed specifically to represent and query highly interconnected data.
+
+Operations: CRUD operations on nodes/edges/properties, complex traversal queries following relationships. Often use specialized query languages (e.g., Cypher for Neo4j).
+
+Pros: Excellent performance for relationship-heavy queries (traversals), intuitive modeling for connected data.
+
+Cons: Can be less efficient for global aggregations compared to other models, vertical scaling often preferred initially.
+
+Examples: Neo4j, JanusGraph, Amazon Neptune.
+
+Use Cases: Social networks, recommendation engines, fraud detection, network/IT operations, knowledge graphs.
+
+(Graph Store Details - Slide 46, 47): Based on graph theory, use graph algorithms, nodes/relationships/traversals, often support ACID.*
+
+5. Case Study: Unstructured Data from Social Media
+
+Data Types: Social media generates massive amounts of diverse data:
+
+User profiles (semi-structured, often JSON-like).
+
+Posts/Tweets (text, images, videos - unstructured/semi-structured).
+
+Connections/Friendships/Follows (relationships - graph structure).
+
+Likes/Shares/Comments (interactions, often linked to posts/users).
+
+Messages (text, potentially multimedia).
+
+Timestamps, location data, metadata.
+
+Challenges for RDBMS:
+
+Schema Rigidity: Difficult to accommodate new features or varying user profile information without schema changes.
+
+Scalability: Handling billions of posts, users, and connections requires massive horizontal scaling, which is difficult for traditional RDBMS.
+
+Relationship Complexity: Modeling complex social graphs and querying relationships (e.g., "friends of friends") can be slow with SQL joins.
+
+Data Variety: Storing diverse media types alongside structured profile data is cumbersome.
+
+Why NoSQL Fits:
+
+Document Databases (e.g., MongoDB): Good for user profiles, posts, comments due to flexible schema and natural JSON/BSON mapping. Can embed comments within posts.
+
+Graph Databases (e.g., Neo4j): Ideal for modeling the social graph (users, relationships) and performing fast traversal queries (recommendations, connection analysis).
+
+Key-Value Stores (e.g., Redis): Often used for caching frequently accessed data (user sessions, timelines) to improve performance.
+
+Column-Family Stores (e.g., Cassandra): Can be used for storing activity streams, messages, or analytics data due to high write performance and scalability.
+
+Scalability & Availability: NoSQL solutions are built for horizontal scaling and often prioritize availability, crucial for global social platforms. Flexible consistency models (eventual consistency) are often acceptable for timelines or view counts.
+
+6. MongoDB (Specific Focus)
+
+(References: Slides 41, 42, 52-83, 86-157)
+
+Overview: Open-source, leading document-oriented database. Stores data in flexible, JSON-like BSON (Binary JSON) documents. Aims to bridge the gap between key-value stores (speed/scalability) and RDBMS (rich functionality). (Slides 52, 54, 56)
+
+Core Concepts: (Slide 59, 97)
+
+Database: Container for collections.
+
+Collection: Groups related documents (analogous to RDBMS table). Schema-less (documents in a collection don't need the same structure).
+
+Document: Basic unit of data (analogous to RDBMS row), BSON format. Max size 16MB.
+
+Field: Key-value pair within a document (analogous to RDBMS column).
+
+_id: Unique identifier automatically added to each document if not provided, acts as primary key.
+
+Data Modeling: Supports embedding documents/arrays within other documents (denormalization, reduces need for joins) or using references (linking documents via _id, requires separate application-level lookups). (Slides 57, 58, 61)
+
+MongoDB Shell (mongo or mongosh): Interactive JavaScript shell for interacting with MongoDB instances. Used for admin tasks, querying, updates. (Slides 89, 90, 91)
+
+Data Types: Supports standard JSON types plus others like ObjectId, Date, binary data, regular expressions, JavaScript code. (Slide 95)
+
+CRUD Operations: (Slides 92, 93, 94, 101, 103-109)
+
+Create:
+
+db.collection.insertOne({doc})
+
+db.collection.insertMany([{doc1}, {doc2}])
+
+db.collection.updateOne({query}, {$set: {update}}, {upsert: true}) (Upsert: update if exists, insert if not)
+
+Read:
+
+db.collection.find({query}, {projection}): Returns a cursor to matching documents. Query uses document structure (e.g., {status: "A", age: {$gt: 25}}). Projection specifies fields to include/exclude (e.g., {name: 1, _id: 0}).
+
+db.collection.findOne({query}, {projection}): Returns the first matching document.
+
+Update:
+
+db.collection.updateOne({query}, {update_operator: {update}})
+
+db.collection.updateMany({query}, {update_operator: {update}})
+
+Update Operators: $set (set field value), $unset (remove field), $inc (increment number), $rename, array operators ($push, $pop, $pull), etc.
+
+Delete:
+
+db.collection.deleteOne({query})
+
+db.collection.deleteMany({query})
+
+db.collection.drop(): Deletes entire collection.
+
+Indexing: (Implicit in Slides 41, 55)
+
+Crucial for query performance.
+
+Uses B+-trees by default.
+
+Supports indexing on any field, including fields within embedded documents and arrays.
+
+Types: Single field, compound, multikey (for arrays), geospatial, text, hashed.
+
+db.collection.createIndex({field: 1/-1}) (1=ascending, -1=descending)
+
+Aggregation Framework: (Slides 111-121, 136-141, 146-148)
+
+Processes data records and returns computed results. Modeled as a data processing pipeline.
+
+Documents pass through stages, each transforming the documents.
+
+db.collection.aggregate([...pipeline stages...])
+
+Common Stages:
+
+$match: Filters documents (like find query). Use early for performance.
+
+$project: Reshapes documents (select fields, rename fields, compute new fields).
+
+$group: Groups documents by an identifier (_id) and applies accumulator expressions ($sum, $avg, $min, $max, $push, $addToSet).
+
+$sort: Sorts documents.
+
+$limit: Limits the number of output documents.
+
+$skip: Skips a number of output documents.
+
+$unwind: Deconstructs an array field into multiple documents, one per array element.
+
+MapReduce: (Slides 83, 151-157)
+
+Alternative aggregation method for complex operations not easily done with the aggregation pipeline.
+
+Uses JavaScript functions for map (emits key-value pairs from input documents) and reduce (combines values for a given key).
+
+Generally slower than the aggregation pipeline, often used for batch processing.
+
+db.collection.mapReduce(mapFunction, reduceFunction, {out: {output_collection}})
+
+Replication: (Slides 55, 66, 67, 68, 82)
+
+Provides redundancy and high availability using Replica Sets.
+
+A replica set is a cluster of MongoDB nodes (mongod instances).
+
+One node acts as the Primary (receives all writes).
+
+Other nodes are Secondaries (replicate data from primary).
+
+Automatic failover: If primary becomes unavailable, secondaries elect a new primary.
+
+Reads can optionally be directed to secondaries (Read Preferences) for read scaling, but may see eventually consistent data.
+
+Sharding: (Slides 55, 70-82)
+
+Provides horizontal scalability by partitioning data across multiple servers (shards).
+
+Each shard is typically a replica set itself (for high availability).
+
+Components:
+
+Shards: Store partitioned data.
+
+Config Servers: Store metadata about the cluster (chunk distribution). Must be run as a replica set.
+
+Mongos Routers: Query routers. Applications connect to mongos, which directs operations to appropriate shards.
+
+Shard Key: An indexed field (or fields) used to determine how data is distributed across chunks (ranges of shard key values). Choosing a good shard key is critical for performance and even distribution.
+
+Balancer: Process (running on mongos) that migrates chunks between shards to ensure data is evenly distributed.
+
+Connectivity: (Slide 42 implies drivers)
+
+Applications connect via official MongoDB Drivers available for numerous programming languages (Python, Java, Node.js, C#, etc.).
+
+Drivers handle communication with mongod (standalone or replica set) or mongos (sharded cluster).
+
+7. Cassandra
+
+(References: Slides 35, 44, 45)
+
+Overview: Open-source, distributed, wide-column (column-family) NoSQL database. Known for high availability, excellent fault tolerance, and linear scalability, especially for write-heavy workloads. Developed at Facebook, now Apache project.
+
+Key Features:
+
+Decentralized (Masterless): All nodes are peers (no single point of failure). Uses a peer-to-peer gossip protocol for cluster state.
+
+High Availability & Fault Tolerance: Data is replicated across multiple nodes (configurable replication factor). Supports multi-data center replication. Hinted handoffs allow writes even if some nodes are temporarily down.
+
+Scalability: Excellent horizontal scalability; add nodes to increase capacity and performance linearly.
+
+Tunable Consistency: Allows choosing consistency level per-query (e.g., ANY, ONE, QUORUM, ALL) providing a trade-off between consistency and performance/availability. Often configured for eventual consistency.
+
+Data Model: Uses Keyspaces (like DBs), Column Families (like tables), Rows (identified by primary key), Columns (data within rows). Optimized for efficient writes and reads by primary key.
+
+Query Language: CQL (Cassandra Query Language) - provides an SQL-like interface.
+
+Architecture: Often described using a ring architecture with data distributed using consistent hashing.
+
+Use Cases: Applications requiring high availability, massive scalability, and heavy write loads (e.g., IoT data ingestion, logging, messaging systems, activity feeds).
